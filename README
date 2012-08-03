@@ -1,0 +1,165 @@
+SameGame Autoplay
+(by Wolfgang Teuber)
+
+SameGame Autoplay is a tool set for automated playing a round-based SameGame.
+The main components are the player (for interacting with screen and mouse)
+and the solver(s) (for finding solutions for a particular SameGame setup).
+SameGame Autoplay contains one player and two solvers. The player (written with
+AutoIt3) firstly parses the SameGame from the screen and secondly controls the
+mouse movement adn clicks during the playing phase. It will work with any
+SameGame application (javascript, flash, java, desktop, ...).
+
+
+1 Environment
+  For a full use of SameGame Autoplay you need:
+    - Windows, XP or higher
+    - cygwin with make, gcc, ...
+    - AutoIt, v3.3.8.0
+    - Ruby 1.9.3
+
+
+2 Install
+  In your cygwin bash run:
+    $> bash install.sh
+
+
+3 Run
+  Before starting SameGame Autoplay you need to write a configuration file for
+  this particular SameGame implementation and place the mouse cursor
+  over the most left bottom tile of the SameGame field or (if there is
+  a init_cursor executable) anywhere over the SameGame field. Once you
+  did all that, run:
+    $> ./autoplay.rb <rounds> <samegame>
+
+  Sample: $> ./autoplay.rb 1 knugie_same
+  This will print a detailed log like this:
+    2012/05/04 12:07:52.296>>    Autoplay | Round: 1 of 1
+    2012/05/04 12:07:52.476>>    Init     | mouse cursor position: .\player\bin\knugie_same_init_cursor.exe
+    2012/05/04 12:07:53.070>>    Parse    | start, samegame (knugie_same)...
+    2012/05/04 12:07:53.101>>    Parse    | result:
+    1 1 2 3 1 3 1 1 2 2 2 3 2 3 3
+    2 1 3 2 3 3 1 1 3 1 3 2 2 2 2
+    1 2 2 2 3 1 2 1 1 1 2 3 3 2 2
+    2 1 3 2 1 3 1 2 1 1 2 2 3 1 3
+    2 3 2 2 3 2 3 3 1 3 3 1 2 3 2
+    3 1 2 3 2 1 3 2 1 2 2 2 1 1 1
+    3 2 1 2 1 3 1 2 3 1 1 3 3 3 3
+    2 3 3 2 3 1 2 1 2 3 2 1 1 3 3
+    1 3 3 3 1 1 1 1 2 2 3 1 1 2 2
+    1 2 1 2 2 1 2 2 1 3 1 1 1 3 1
+    [[1,1,2,3,3,2,2,1,2,1],[2,3,3,2,1,3,1,2,1,1],[1,3,3,1,2,2,3,2,3,2],[2,3,2,2,3,2,2,2,2,3],[2,1,3,1,2,3,1,3,3,1],[1,1,1,3,1,2,3,1,3,3],[2,1,2,1,3,3,1,2,1,1],[2,1,1,2,2,3,2,1,1,1],[1,2,2,3,1,1,1,1,3,2],[3,2,3,1,2,3,1,1,1,2],[1,3,2,1,2,3,2,2,3,2],[1,1,1,3,2,1,2,3,2,3],[1,1,1,3,1,2,3,3,2,2],[3,2,3,3,1,3,1,2,2,3],[1,2,3,3,1,2,3,2,2,3]]
+    2012/05/04 12:07:53.101>>    Parse    | done, samegame (knugie_same)
+    2012/05/04 12:07:53.222>>    Solve    | start, use evolutionary solver...
+    2012/05/04 12:07:56.629>>    Solve    | done, solution:
+    [10,15,11,3,19,4,18,5,5,3,4,5,1,7,2,5,5,3,11,3,1,7,3,2,3,5,1,4,2,3,2,2,1,1,1]
+    2012/05/04 12:07:56.819>>    Init     | mouse cursor position: .\player\bin\knugie_same_init_cursor.exe
+    2012/05/04 12:07:57.382>>    Play     | start, samegame (knugie_same)...
+    2012/05/04 12:08:26.942>>    Play     | done, samegame (knugie_same)
+
+  To print the help screen, simply run:
+    $> ./autoplay.rb
+
+  This will also list all currently available configurations.
+  Sample output:
+    Autoplay for SameGame Solver
+    USAGE: ruby ./autoplay.rb <rounds> <samegame>
+    Supported samegames are:
+        - bezumie_same
+        - bricks_breaking
+        - cube_crash
+        - haynes_same
+        - knugie_same
+
+  In the printed help, it says "ruby ./autoplay.rb ...". "ruby" does not need to
+  be written if the "./autoplay.rb" is executable. Running the ./install.sh
+  ensures that. No matter if "./autoplay.rb" is executable or not,
+  "ruby ./autoplay.rb ..." will work just fine if "./autoplay.rb" is readable.
+  
+  If you want to redirect log output to a sepqrat file, use 
+    $> ruby autorun.rb 1000 knugie_same > knugie_same_1000.log 2>&1 &
+  
+  This will run 1000 rounds of knugie_same and write all log messages to
+  knugie_same_1000.log. This way you are able to check your logs later on.
+
+
+4 Writing configuration files
+  Configuration files are located at ./player/config/ . The syntax is based on the
+  ini-format. Sample:
+    ;This is a configuration file for SameGame Autoplay
+    ;It contains settings for parsing, solving and (auto)playing a SameGame.
+
+    [general]
+    ;name of this samegame implementation (optional)
+    name=knugie_same
+    ;command used to set the initial mouse cursor position (optional)
+    set_cursor=.\player\bin\knugie_same_init_cursor.exe
+    ;a link to the samegame implementation (optional)
+    resource=http://knugie.de/samegame/
+
+    [game settings]
+    ;number of columns of the game field
+    cols=15
+    ;number of rows of the game field
+    rows=10
+    ;width of a tile in pixels
+    tile_width=32
+    ;height of a tile in pixels
+    tile_height=32
+    ;number of least connected tiles to be "hittable"
+    area=2
+    ;number of clicks needed to clear a group of tiles
+    clicks=1
+    ;number of milliseconds the program should wait after an area has been removed
+    wait_after_click=0
+    ;number of milliseconds the program should wait after the mouse curser has moved away from the game field
+    wait_after_move=20
+
+    [color settings]
+    ;color tolerance for each value of R-, G- and B-component
+    color_tolerance=30
+    ;threshold value of RGB components for background color
+    background_threshold=10
+    ;states if the background is 'darker' or 'brighter' than the tiles
+    background_compared=darker
+
+    [solver]
+    ;type of algorithm used to search for a solution, one of: evolutionary, brute-force
+    type=evolutionary
+
+
+5 Testing your configuration file
+  Once your created a new configuration file, only parse the SameGame first. You
+  need to place your mouse cursor over the most left bottom tile of the SameGame
+  and run:
+    $> ./player/bin/samegame.exe --config=./player/config/mynewconfig.cfg
+  If the result looks like your SameGame, you are ready to autoplay the samegame.
+  Change the parameters as you wish until you get a satisfying result.
+
+
+6 Writing init_cursor executables
+  Placing the mouse cursor by hand might result in unwanted effects. To
+  eliminate misbehavior, you can write init_cursor executables (or scripts).
+  Init_cursor executables are located at ./player/bin/ . You can find the source
+  code at ./player/src/ . Here is a sample written in AutoItv3:
+    ;~ knugie_same_init_cursor.au3
+    ;~ makes sure the mouse cursor is positioned correctly
+    ;~ http://knugie.de/samegame
+
+    Local $orig = MouseGetPos()
+    ;~ Move left until white pixel is found
+    While PixelGetColor($orig[0], $orig[1]) <> 16777215
+      $orig[0] = $orig[0] - 1
+    WEnd
+    ;~ Move down to the corner of the game field
+    While PixelGetColor($orig[0] + 1, $orig[1]) <> 16777215
+      $orig[1] = $orig[1] + 1
+    WEnd
+    ;~ Set cursor to the center of the most bottom left tile
+    MouseMove($orig[0] + 15, $orig[1] - 15, 0)
+
+
+7 Player's Makefile
+  There is a Makefile in ./player/ . Make sure to update it according to your
+  changes in the project. Otherwise ./install.sh will not work properly.
+
+Have fun (not) playing the SameGame ;-)
